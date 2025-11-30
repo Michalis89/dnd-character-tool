@@ -1,0 +1,6 @@
+.env
+.env.local
+.csv
+.json
+.db
+.sqlite3
