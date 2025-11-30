@@ -1,4 +1,2 @@
-print("poutses")
 import fastapi
-
-print(f"{fastapi.__version__}")
+from backend.routers import characters, spells, items
