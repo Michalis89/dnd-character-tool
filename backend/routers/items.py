@@ -2,6 +2,7 @@ from enum import Enum
 from typing import List, Optional, Union
 from pydantic import BaseModel, Field, validator
 
+
 class ItemType(str, Enum):
     WEAPON = "weapon"
     ARMOR = "armor"
@@ -28,7 +29,9 @@ class Rarity(str, Enum):
 
 class DamageDie(BaseModel):
     dice: str = Field(..., description="Dice expression, e.g., '1d8' or '2d6'")
-    damage_type: Optional[str] = Field(None, description="Type of damage, e.g., 'slashing'")
+    damage_type: Optional[str] = Field(
+        None, description="Type of damage, e.g., 'slashing'"
+    )
 
     @validator("dice")
     def validate_dice(cls, v: str) -> str:
@@ -55,14 +58,23 @@ class Cost(BaseModel):
 
 class ItemBase(BaseModel):
     name: str = Field(..., description="Display name of the item")
-    description: Optional[str] = Field(None, description="Full description / rules text")
+    description: Optional[str] = Field(
+        None, description="Full description / rules text"
+    )
     item_type: ItemType = Field(ItemType.OTHER)
     rarity: Optional[Rarity] = Field(None)
     weight: Optional[float] = Field(None, description="Weight in pounds")
     cost: Optional[Cost] = None
-    attunement: Optional[bool] = Field(False, description="Whether the item requires attunement")
-    consumable: Optional[bool] = Field(False, description="Whether the item is consumed on use")
-    properties: List[str] = Field(default_factory=list, description="Arbitrary properties, e.g., 'light', 'finesse'")
+    attunement: Optional[bool] = Field(
+        False, description="Whether the item requires attunement"
+    )
+    consumable: Optional[bool] = Field(
+        False, description="Whether the item is consumed on use"
+    )
+    properties: List[str] = Field(
+        default_factory=list,
+        description="Arbitrary properties, e.g., 'light', 'finesse'",
+    )
 
     def is_magic(self) -> bool:
         return self.rarity is not None and self.rarity != Rarity.COMMON

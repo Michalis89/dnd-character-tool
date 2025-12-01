@@ -50,13 +50,22 @@ class ClassArchetype(BaseModel):
             char_level = getattr(character, "level", None)
             if char_level is None:
                 # try method
-                char_level = character.level() if callable(getattr(character, "level", None)) else None
+                char_level = (
+                    character.level()
+                    if callable(getattr(character, "level", None))
+                    else None
+                )
             if char_level is None or char_level < min_level:
                 return False
         # Additional checks can be added as needed
         return True
 
-    def apply_to(self, character: Any, up_to_level: Optional[int] = None, choices_resolver: Optional[Callable[[str, List[str]], str]] = None) -> Dict[str, Any]:
+    def apply_to(
+        self,
+        character: Any,
+        up_to_level: Optional[int] = None,
+        choices_resolver: Optional[Callable[[str, List[str]], str]] = None,
+    ) -> Dict[str, Any]:
         """
         Apply archetype to a character object.
         - character: any object representing a character
@@ -72,7 +81,9 @@ class ClassArchetype(BaseModel):
         result = {"applied_features": [], "missing_choices": {}}
 
         # mark archetype on character
-        if hasattr(character, "set_archetype") and callable(getattr(character, "set_archetype")):
+        if hasattr(character, "set_archetype") and callable(
+            getattr(character, "set_archetype")
+        ):
             character.set_archetype(self.name)
         else:
             # fallback: set attribute
@@ -80,7 +91,9 @@ class ClassArchetype(BaseModel):
 
         # add proficiencies
         for prof in self.proficiencies:
-            if hasattr(character, "add_proficiency") and callable(getattr(character, "add_proficiency")):
+            if hasattr(character, "add_proficiency") and callable(
+                getattr(character, "add_proficiency")
+            ):
                 character.add_proficiency(prof)
             else:
                 if not hasattr(character, "proficiencies"):
@@ -92,7 +105,9 @@ class ClassArchetype(BaseModel):
         # add spells
         for spell_level, spells in self.spells.items():
             for spell in spells:
-                if hasattr(character, "add_spell") and callable(getattr(character, "add_spell")):
+                if hasattr(character, "add_spell") and callable(
+                    getattr(character, "add_spell")
+                ):
                     character.add_spell(spell, spell_level)
                 else:
                     if not hasattr(character, "spells"):
@@ -107,14 +122,22 @@ class ClassArchetype(BaseModel):
             if up_to_level is not None and feat.level > up_to_level:
                 continue
             # call preferred character method
-            if hasattr(character, "add_feature") and callable(getattr(character, "add_feature")):
+            if hasattr(character, "add_feature") and callable(
+                getattr(character, "add_feature")
+            ):
                 character.add_feature(feat.name, feat.description or "", feat.level)
             else:
                 # fallback: attach to features list
                 if not hasattr(character, "features"):
                     setattr(character, "features", [])
                 ch_feats = getattr(character, "features")
-                ch_feats.append({"name": feat.name, "description": feat.description or "", "level": feat.level})
+                ch_feats.append(
+                    {
+                        "name": feat.name,
+                        "description": feat.description or "",
+                        "level": feat.level,
+                    }
+                )
             result["applied_features"].append(feat.name)
 
         # resolve choices
@@ -133,7 +156,9 @@ class ClassArchetype(BaseModel):
                 # apply the selected choice as a proficiency or feature depending on key
                 # simple heuristics:
                 if key.startswith("skill") or key == "skill":
-                    if hasattr(character, "add_proficiency") and callable(getattr(character, "add_proficiency")):
+                    if hasattr(character, "add_proficiency") and callable(
+                        getattr(character, "add_proficiency")
+                    ):
                         character.add_proficiency(selected)
                     else:
                         if not hasattr(character, "proficiencies"):
@@ -153,6 +178,7 @@ class ArchetypeRegistry:
     Simple in-memory registry for archetypes. Useful for lookups in the characters
     module/router.
     """
+
     def __init__(self):
         self._by_id: Dict[str, ClassArchetype] = {}
         self._by_class: Dict[str, List[ClassArchetype]] = {}
@@ -178,11 +204,19 @@ rogue_thief = ClassArchetype(
     class_name="Rogue",
     description="Rogues who rely on quick wits and agility, specializing in stealth and sleight of hand.",
     features=[
-        ArchetypeFeature(name="Fast Hands", level=3, description="Use the bonus action to make sleight of hand checks."),
-        ArchetypeFeature(name="Second-Story Work", level=3, description="Climbing no longer costs extra movement and adds to jump distance."),
+        ArchetypeFeature(
+            name="Fast Hands",
+            level=3,
+            description="Use the bonus action to make sleight of hand checks.",
+        ),
+        ArchetypeFeature(
+            name="Second-Story Work",
+            level=3,
+            description="Climbing no longer costs extra movement and adds to jump distance.",
+        ),
     ],
     proficiencies=["Thieves' Tools"],
-    choices={"skill": ["Sleight of Hand", "Stealth", "Acrobatics"]}
+    choices={"skill": ["Sleight of Hand", "Stealth", "Acrobatics"]},
 )
 _registry.register(rogue_thief)
 

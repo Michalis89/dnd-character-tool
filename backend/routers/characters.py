@@ -5,8 +5,10 @@ from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/characters", tags=["characters"])
 
+
 def ability_modifier(score: int) -> int:
     return (score - 10) // 2
+
 
 class Character(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
@@ -18,9 +20,16 @@ class Character(BaseModel):
     max_hp: int = 8
     current_hp: int = 8
     ac: int = 10
-    stats: Dict[str, int] = Field(default_factory=lambda: {
-        "str": 10, "dex": 10, "con": 10, "int": 10, "wis": 10, "cha": 10
-    })
+    stats: Dict[str, int] = Field(
+        default_factory=lambda: {
+            "str": 10,
+            "dex": 10,
+            "con": 10,
+            "int": 10,
+            "wis": 10,
+            "cha": 10,
+        }
+    )
     skills: List[str] = Field(default_factory=list)
     inventory: List[str] = Field(default_factory=list)
     notes: Optional[str] = None
@@ -64,13 +73,17 @@ class Character(BaseModel):
             raise KeyError(f"Unknown stat: {name}")
         self.stats[name] = value
 
+
 # In-memory store for example purposes
 _characters: Dict[str, Character] = {}
+
 
 @router.post("/", response_model=Character)
 def create_character(payload: Character):
     if payload.id in _characters:
-        raise HTTPException(status_code=400, detail="Character with this ID already exists")
+        raise HTTPException(
+            status_code=400, detail="Character with this ID already exists"
+        )
     _characters[payload.id] = payload
     return payload
 
@@ -87,6 +100,7 @@ def get_character(character_id: str):
         raise HTTPException(status_code=404, detail="Character not found")
     return c
 
+
 @router.post("/{character_id}/level-up", response_model=Character)
 def level_up_character(character_id: str):
     c = _characters.get(character_id)
@@ -94,6 +108,7 @@ def level_up_character(character_id: str):
         raise HTTPException(status_code=404, detail="Character not found")
     c.level_up()
     return c
+
 
 @router.post("/{character_id}/damage", response_model=Character)
 def damage_character(character_id: str, amount: int):
@@ -106,6 +121,7 @@ def damage_character(character_id: str, amount: int):
         raise HTTPException(status_code=400, detail=str(e))
     return c
 
+
 @router.post("/{character_id}/heal", response_model=Character)
 def heal_character(character_id: str, amount: int):
     c = _characters.get(character_id)
@@ -117,6 +133,7 @@ def heal_character(character_id: str, amount: int):
         raise HTTPException(status_code=400, detail=str(e))
     return c
 
+
 @router.post("/{character_id}/inventory", response_model=Character)
 def add_inventory_item(character_id: str, item: str):
     c = _characters.get(character_id)
@@ -124,6 +141,7 @@ def add_inventory_item(character_id: str, item: str):
         raise HTTPException(status_code=404, detail="Character not found")
     c.add_item(item)
     return c
+
 
 @router.delete("/{character_id}/inventory", response_model=Character)
 def remove_inventory_item(character_id: str, item: str):
