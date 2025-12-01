@@ -3,4 +3,9 @@
 .csv
 .json
 .db
+.venv
 .sqlite3
+.DS_Store
+__pycache__/
+*.pyc
+.DS_Store
